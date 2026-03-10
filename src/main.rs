@@ -360,6 +360,10 @@ fn simulate_fcfs(config: &mut Config) -> Vec<String> {
     let mut events: Vec<String> = Vec::new();
     let mut current: Option<usize> = None; // index of the currently running process
     let mut ready: VecDeque<usize> = VecDeque::new(); // indices in arrival order
+                                                      // A process finishing at end of tick t gets a "finished" stamp of t+1.
+                                                      // We defer emitting that event so that arrivals at t+1 appear first in
+                                                      // the log, matching the expected output ordering.
+    let mut pending_finish: Option<usize> = None;
 
     for t in 0..run_for {
         // --- Step 1: enqueue any processes arriving this tick ---
@@ -370,7 +374,14 @@ fn simulate_fcfs(config: &mut Config) -> Vec<String> {
             }
         }
 
-        // --- Step 2: if CPU is free, pick the next ready process ---
+        // --- Step 2: emit finish event deferred from the previous tick ---
+        // Arrivals are emitted first so that when a finish and an arrival share
+        // the same timestamp, the arrival appears first in the log.
+        if let Some(idx) = pending_finish.take() {
+            events.push(format!("Time {:3} : {} finished", t, procs[idx].name));
+        }
+
+        // --- Step 3: if CPU is free, pick the next ready process ---
         if current.is_none() {
             if let Some(idx) = ready.pop_front() {
                 let p = &mut procs[idx];
@@ -387,7 +398,7 @@ fn simulate_fcfs(config: &mut Config) -> Vec<String> {
             }
         }
 
-        // --- Step 3: advance simulation by one tick ---
+        // --- Step 4: advance simulation by one tick ---
         match current {
             None => {
                 // No runnable process: CPU is idle this tick.
@@ -395,9 +406,7 @@ fn simulate_fcfs(config: &mut Config) -> Vec<String> {
             }
             Some(idx) => {
                 // Charge one tick of wait to every process in the ready queue.
-                // We must collect indices first to avoid holding two mutable
-                // borrows into `procs` at the same time (Rust's borrow checker
-                // disallows indexing `procs` mutably while iterating it).
+                // Collect indices first to avoid simultaneous mutable borrows.
                 let waiting: Vec<usize> = ready.iter().copied().collect();
                 for ri in waiting {
                     procs[ri].wait += 1;
@@ -407,18 +416,18 @@ fn simulate_fcfs(config: &mut Config) -> Vec<String> {
                 procs[idx].remaining -= 1;
 
                 if procs[idx].remaining == 0 {
-                    // Process finished: record completion stats.
-                    let finish_t = t + 1;
                     procs[idx].finished = true;
-                    procs[idx].turnaround = finish_t - procs[idx].arrival;
-                    events.push(format!(
-                        "Time {:3} : {} finished",
-                        finish_t, procs[idx].name
-                    ));
-                    current = None; // CPU is now free
+                    procs[idx].turnaround = (t + 1) - procs[idx].arrival;
+                    pending_finish = Some(idx); // emit at start of next tick
+                    current = None;
                 }
             }
         }
+    }
+
+    // Flush any finish event that falls exactly on the run_for boundary.
+    if let Some(idx) = pending_finish.take() {
+        events.push(format!("Time {:3} : {} finished", run_for, procs[idx].name));
     }
 
     events
@@ -441,6 +450,7 @@ fn simulate_sjf(config: &mut Config) -> Vec<String> {
     let mut events: Vec<String> = Vec::new();
     let mut ready: Vec<usize> = Vec::new(); // unordered pool of eligible indices
     let mut current: Option<usize> = None;
+    let mut pending_finish: Option<usize> = None; // deferred finish event (see FCFS)
 
     for t in 0..run_for {
         // --- Step 1: arrivals ---
@@ -451,7 +461,14 @@ fn simulate_sjf(config: &mut Config) -> Vec<String> {
             }
         }
 
-        // --- Step 2: choose the best candidate from the ready pool ---
+        // --- Step 2: emit finish event deferred from the previous tick ---
+        // Arrivals are emitted first so that when a finish and an arrival share
+        // the same timestamp, the arrival appears first in the log.
+        if let Some(idx) = pending_finish.take() {
+            events.push(format!("Time {:3} : {} finished", t, procs[idx].name));
+        }
+
+        // --- Step 3: choose the best candidate from the ready pool ---
         // min_by gives us the index with the shortest remaining time
         // (alphabetical name used as a stable tie-breaker).
         let best = ready.iter().copied().min_by(|&a, &b| {
@@ -461,7 +478,7 @@ fn simulate_sjf(config: &mut Config) -> Vec<String> {
                 .then(procs[a].name.cmp(&procs[b].name))
         });
 
-        // --- Step 3: preempt or select ---
+        // --- Step 4: preempt or select ---
         match (current, best) {
             (None, Some(b)) => {
                 // CPU was idle; select the best candidate.
@@ -490,16 +507,13 @@ fn simulate_sjf(config: &mut Config) -> Vec<String> {
             }
         }
 
-        // --- Step 4: advance by one tick ---
+        // --- Step 5: advance by one tick ---
         match current {
             None => {
                 events.push(format!("Time {:3} : Idle", t));
             }
             Some(idx) => {
                 // Charge one wait tick to every ready process except the running one.
-                // Collect into a temporary Vec to satisfy the borrow checker —
-                // iterating `ready` while also mutably indexing `procs` would
-                // require two simultaneous mutable borrows of `procs`.
                 let waiting: Vec<usize> = ready.iter().copied().filter(|&i| i != idx).collect();
                 for ri in waiting {
                     procs[ri].wait += 1;
@@ -508,19 +522,18 @@ fn simulate_sjf(config: &mut Config) -> Vec<String> {
                 procs[idx].remaining -= 1;
 
                 if procs[idx].remaining == 0 {
-                    let finish_t = t + 1;
                     procs[idx].finished = true;
-                    procs[idx].turnaround = finish_t - procs[idx].arrival;
-                    events.push(format!(
-                        "Time {:3} : {} finished",
-                        finish_t, procs[idx].name
-                    ));
-                    // Remove the finished process from the ready pool.
+                    procs[idx].turnaround = (t + 1) - procs[idx].arrival;
                     ready.retain(|&i| i != idx);
+                    pending_finish = Some(idx); // emit at start of next tick
                     current = None;
                 }
             }
         }
+    }
+
+    if let Some(idx) = pending_finish.take() {
+        events.push(format!("Time {:3} : {} finished", run_for, procs[idx].name));
     }
 
     events
@@ -550,6 +563,7 @@ fn simulate_rr(config: &mut Config, quantum: u32) -> Vec<String> {
     let mut ready: VecDeque<usize> = VecDeque::new();
     let mut current: Option<usize> = None;
     let mut quantum_left: u32 = 0; // ticks remaining in the current quantum slice
+    let mut pending_finish: Option<usize> = None; // deferred finish event (see FCFS)
 
     for t in 0..run_for {
         // --- Step 1: enqueue newly arriving processes ---
@@ -563,7 +577,14 @@ fn simulate_rr(config: &mut Config, quantum: u32) -> Vec<String> {
             }
         }
 
-        // --- Step 2: check if the current quantum has expired ---
+        // --- Step 2: emit finish event deferred from the previous tick ---
+        // Arrivals are emitted first so that when a finish and an arrival share
+        // the same timestamp, the arrival appears first in the log.
+        if let Some(idx) = pending_finish.take() {
+            events.push(format!("Time {:3} : {} finished", t, procs[idx].name));
+        }
+
+        // --- Step 3: check if the current quantum has expired ---
         // If so, re-queue the running process (if still unfinished) and clear current.
         if let Some(idx) = current {
             if quantum_left == 0 {
@@ -574,7 +595,7 @@ fn simulate_rr(config: &mut Config, quantum: u32) -> Vec<String> {
             }
         }
 
-        // --- Step 3: select next process if CPU is free ---
+        // --- Step 4: select next process if CPU is free ---
         if current.is_none() {
             if let Some(idx) = ready.pop_front() {
                 if procs[idx].response.is_none() {
@@ -589,7 +610,7 @@ fn simulate_rr(config: &mut Config, quantum: u32) -> Vec<String> {
             }
         }
 
-        // --- Step 4: advance by one tick ---
+        // --- Step 5: advance by one tick ---
         match current {
             None => {
                 events.push(format!("Time {:3} : Idle", t));
@@ -607,18 +628,18 @@ fn simulate_rr(config: &mut Config, quantum: u32) -> Vec<String> {
 
                 if procs[idx].remaining == 0 {
                     // Process finished before (or exactly at) quantum expiry.
-                    let finish_t = t + 1;
                     procs[idx].finished = true;
-                    procs[idx].turnaround = finish_t - procs[idx].arrival;
-                    events.push(format!(
-                        "Time {:3} : {} finished",
-                        finish_t, procs[idx].name
-                    ));
+                    procs[idx].turnaround = (t + 1) - procs[idx].arrival;
+                    pending_finish = Some(idx); // emit at start of next tick
                     current = None;
                     quantum_left = 0; // prevent the expiry check above from re-queuing
                 }
             }
         }
+    }
+
+    if let Some(idx) = pending_finish.take() {
+        events.push(format!("Time {:3} : {} finished", run_for, procs[idx].name));
     }
 
     events
