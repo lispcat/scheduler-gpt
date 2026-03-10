@@ -90,9 +90,8 @@ pub fn parse_input(content: &str) -> Result<Config, String> {
         Some("sjf") => Algorithm::Sjf,
         Some("rr") => {
             // RR requires a quantum; fail with a specific message if absent.
-            let q = quantum.ok_or_else(|| {
-                "Error: missing quantum parameter when use is 'rr'.".to_string()
-            })?;
+            let q = quantum
+                .ok_or_else(|| "Error: missing quantum parameter when use is 'rr'.".to_string())?;
             Algorithm::Rr(q)
         }
         Some(other) => return Err(format!("Error: Unknown algorithm '{}'.", other)),

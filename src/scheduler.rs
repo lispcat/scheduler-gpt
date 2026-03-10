@@ -36,9 +36,9 @@ fn simulate_fcfs(config: &mut Config) -> Vec<String> {
     let mut events: Vec<String> = Vec::new();
     let mut current: Option<usize> = None; // index of the currently running process
     let mut ready: VecDeque<usize> = VecDeque::new(); // indices in arrival order
-    // A process finishing at end of tick t gets a "finished" stamp of t+1.
-    // We defer emitting that event so that arrivals at t+1 appear first in
-    // the log, matching the expected output ordering.
+                                                      // A process finishing at end of tick t gets a "finished" stamp of t+1.
+                                                      // We defer emitting that event so that arrivals at t+1 appear first in
+                                                      // the log, matching the expected output ordering.
     let mut pending_finish: Option<usize> = None;
 
     for t in 0..run_for {

@@ -73,8 +73,8 @@ impl fmt::Display for Algorithm {
 /// All configuration parsed from the input file.
 #[derive(Debug)]
 pub struct Config {
-    pub process_count: usize,    // declared count of processes (from `processcount` directive)
-    pub run_for: u32,            // total simulation duration in time ticks
-    pub algorithm: Algorithm,    // which scheduling algorithm to use
+    pub process_count: usize, // declared count of processes (from `processcount` directive)
+    pub run_for: u32,         // total simulation duration in time ticks
+    pub algorithm: Algorithm, // which scheduling algorithm to use
     pub processes: Vec<Process>, // list of all processes
 }
