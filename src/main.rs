@@ -642,14 +642,15 @@ fn simulate_rr(config: &mut Config, quantum: u32) -> Vec<String> {
 fn build_output(config: &Config, events: &[String]) -> String {
     let mut lines: Vec<String> = Vec::new();
 
-    // Header: process count and algorithm name.
-    lines.push(format!("{} processes", config.process_count));
+    // Header: process count (2-wide) and algorithm name.
+    lines.push(format!("{:3} processes", config.process_count));
     match &config.algorithm {
         Algorithm::Fcfs => lines.push("Using First-Come First-Served".to_string()),
         Algorithm::Sjf => lines.push("Using preemptive Shortest Job First".to_string()),
         Algorithm::Rr(q) => {
             lines.push("Using Round-Robin".to_string());
-            lines.push(format!("Quantum {}", q));
+            // Quantum value is 3-wide right-justified.
+            lines.push(format!("Quantum {:3}", q));
         }
     }
 
@@ -670,6 +671,7 @@ fn build_output(config: &Config, events: &[String]) -> String {
         if p.finished {
             let response = p.response.unwrap_or(0);
             lines.push(format!(
+                // All three stats are 3-wide right-justified, single space between fields.
                 "{} wait {:3} turnaround {:3} response {:3}",
                 p.name, p.wait, p.turnaround, response
             ));

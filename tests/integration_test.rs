@@ -151,17 +151,24 @@ fn tempfile(label: &str) -> PathBuf {
 }
 
 // ---------------------------------------------------------------------------
-// Test cases — add one function per input/output pair in tests/data/
+// Test cases - one function per input/output fixture pair in tests/data/
 // ---------------------------------------------------------------------------
 
 #[test]
-fn test_sjf_example() {
-    run_test("test1");
+fn test_c2_fcfs() {
+    run_test("c2-fcfs");
+}
+
+#[test]
+fn test_c2_sjf() {
+    run_test("c2-sjf");
+}
+
+#[test]
+fn test_c2_rr() {
+    run_test("c2-rr");
 }
 
 // Add more tests here as you add fixture files, e.g.:
 // #[test]
-// fn test_fcfs_basic() { run_test("test_fcfs_basic"); }
-//
-// #[test]
-// fn test_rr_quantum2() { run_test("test_rr_quantum2"); }
+// fn test_c3_fcfs() { run_test("c3-fcfs"); }
