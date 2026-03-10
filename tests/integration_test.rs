@@ -34,7 +34,7 @@ fn data_dir() -> PathBuf {
 fn run_scheduler(input_file: &Path, cwd: &Path) -> (std::process::ExitStatus, String, String) {
     // `env!("CARGO_BIN_EXE_scheduler")` is injected by Cargo at compile time;
     // the string after the underscore must match the [[bin]] name in Cargo.toml.
-    let bin = env!("CARGO_BIN_EXE_scheduler");
+    let bin = env!("CARGO_BIN_EXE_scheduler-get");
 
     let output = Command::new(bin)
         .arg(input_file)
@@ -123,10 +123,8 @@ fn run_test(stem: &str) {
         stderr
     );
 
-    let actual = fs::read_to_string(&produced_file)
-        .expect("could not read produced output file");
-    let expected = fs::read_to_string(&golden_file)
-        .expect("could not read golden output file");
+    let actual = fs::read_to_string(&produced_file).expect("could not read produced output file");
+    let expected = fs::read_to_string(&golden_file).expect("could not read golden output file");
 
     if actual != expected {
         let diff = simple_diff(&expected, &actual);
