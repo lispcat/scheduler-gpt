@@ -8,10 +8,9 @@ mod models;
 mod output;
 mod parser;
 mod scheduler;
+mod tui;
 
 fn main() {
-    // Parse CLI arguments via Clap.  --help / -h and --version are provided
-    // automatically by Clap; invalid usage prints an error and exits.
     let args = args::Args::parse();
 
     let input_path = &args.input_file;
@@ -26,7 +25,6 @@ fn main() {
     };
 
     // Parse the input text into a SimConfig (domain config from the .in file).
-    // Any structural errors (missing directives, bad values) cause an early exit.
     let mut sim_config = match parser::parse_input(&content) {
         Ok(c) => c,
         Err(e) => {
@@ -35,21 +33,19 @@ fn main() {
         }
     };
 
-    // Run the chosen scheduling algorithm and collect the event log.
+    // Run the simulation.
     let events = scheduler::simulate(&mut sim_config);
 
-    // Build plain-text output for the .out file (never contains ANSI codes).
+    // Build plain output (always written to the .out file).
     let plain = output::build_output(&sim_config, &events, false);
 
-    // Derive the output filename: take only the file stem (no directory
-    // component) and add ".out", then write into the current working directory.
-    // e.g. running with "../tests/data/input.in" produces "./input.out"
+    // Derive output file path and write it.
     let out_filename = Path::new(input_path)
-        .file_stem() // "input"  (drops directory + extension)
+        .file_stem()
         .expect("input path has no filename")
         .to_string_lossy()
         .to_string()
-        + ".out"; // -> "input.out"
+        + ".out";
     let out_path = Path::new(&out_filename).to_path_buf();
 
     if let Err(e) = fs::write(&out_path, &plain) {
@@ -57,10 +53,19 @@ fn main() {
         std::process::exit(1);
     }
 
-    // When --color is requested, print a colorized version to stdout.
-    // Otherwise print the same plain text (mirrors the file contents).
-    let display = output::build_output(&sim_config, &events, args.color);
-    print!("{}", display);
-
-    eprintln!("Output written to {}", out_path.display());
+    if args.tui {
+        // TUI mode: confirmation screen -> results screen.
+        // The output file has already been written above, so the user can
+        // inspect it even if they quit the TUI early.
+        let input_path_str = input_path.to_string_lossy();
+        if let Err(e) = tui::run_tui(&input_path_str, &content, &sim_config, &plain) {
+            eprintln!("TUI error: {}", e);
+            std::process::exit(1);
+        }
+    } else {
+        // Normal (non-TUI) mode: print to stdout, optionally colorized.
+        let display = output::build_output(&sim_config, &events, args.color);
+        print!("{}", display);
+        eprintln!("Output written to {}", out_path.display());
+    }
 }

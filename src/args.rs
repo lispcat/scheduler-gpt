@@ -12,7 +12,6 @@ use clap::Parser;
     name = "scheduler-get",
     version,
     about,
-    // Override the default usage line so it matches the spec format.
     override_usage = "scheduler-get [OPTIONS] <input file>"
 )]
 pub struct Args {
@@ -22,11 +21,20 @@ pub struct Args {
     /// Colorize output with ANSI escape codes.
     ///
     /// Events are color-coded by type:
-    ///   arrived  → cyan
-    ///   selected → green
-    ///   finished → yellow
-    ///   Idle     → dark grey
-    ///   stats    → default (no color)
+    ///   arrived  -> cyan
+    ///   selected -> green
+    ///   finished -> yellow
+    ///   Idle     -> dark grey
     #[arg(short = 'c', long = "color", default_value_t = false)]
     pub color: bool,
+
+    /// Open an interactive TUI to preview input and view results.
+    ///
+    /// Two screens:
+    ///   1. Confirmation: shows the input path, file contents, and parsed
+    ///      summary.  Press <Enter> to run the simulation.
+    ///   2. Results: shows the simulation output.
+    ///      Press <Enter> or <q> to exit.
+    #[arg(short = 't', long = "tui", default_value_t = false)]
+    pub tui: bool,
 }
