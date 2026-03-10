@@ -14,18 +14,18 @@
 
 use std::io;
 
+use crossterm::{
+    event::{self, Event, KeyCode, KeyEventKind},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
 use ratatui::{
-    Terminal,
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout, Margin},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
     widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
-};
-use crossterm::{
-    event::{self, Event, KeyCode, KeyEventKind},
-    execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+    Terminal,
 };
 
 use crate::models::Config;
@@ -91,11 +91,11 @@ struct AppState<'a> {
     screen: Screen,
     // Confirmation screen
     input_path: &'a str,
-    raw_lines: Vec<&'a str>,   // raw_content split by newline
-    summary: Vec<String>,      // human-readable parsed summary bullets
+    raw_lines: Vec<&'a str>, // raw_content split by newline
+    summary: Vec<String>,    // human-readable parsed summary bullets
     // Results screen
     result_lines: Vec<&'a str>,
-    scroll: u16,               // vertical scroll offset for the results view
+    scroll: u16, // vertical scroll offset for the results view
 }
 
 impl<'a> AppState<'a> {
@@ -168,8 +168,12 @@ fn run_app(
                 },
                 Screen::Results => match key.code {
                     KeyCode::Enter | KeyCode::Char('q') => return Ok(()),
-                    KeyCode::Down | KeyCode::Char('j') => state.scroll = state.scroll.saturating_add(1),
-                    KeyCode::Up   | KeyCode::Char('k') => state.scroll = state.scroll.saturating_sub(1),
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        state.scroll = state.scroll.saturating_add(1)
+                    }
+                    KeyCode::Up | KeyCode::Char('k') => {
+                        state.scroll = state.scroll.saturating_sub(1)
+                    }
                     _ => {}
                 },
             }
@@ -186,12 +190,12 @@ fn draw_confirmation(frame: &mut ratatui::Frame, state: &AppState) {
     let area = frame.area();
 
     // Outer block gives the whole screen a border and title.
-    let outer = Block::default()
-        .borders(Borders::ALL)
-        .title(Span::styled(
-            " Scheduler — Confirm Input ",
-            Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD),
-        ));
+    let outer = Block::default().borders(Borders::ALL).title(Span::styled(
+        " Scheduler — Confirm Input ",
+        Style::default()
+            .fg(Color::Cyan)
+            .add_modifier(Modifier::BOLD),
+    ));
     let inner_area = outer.inner(area);
     frame.render_widget(outer, area);
 
@@ -199,15 +203,17 @@ fn draw_confirmation(frame: &mut ratatui::Frame, state: &AppState) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(3),  // input path
-            Constraint::Min(5),     // file contents
-            Constraint::Length(6),  // parsed summary
-            Constraint::Length(1),  // hint
+            Constraint::Length(3), // input path
+            Constraint::Min(5),    // file contents
+            Constraint::Length(6), // parsed summary
+            Constraint::Length(1), // hint
         ])
         .split(inner_area);
 
     // ── Path header ──────────────────────────────────────────────────────────
-    let path_block = Block::default().borders(Borders::BOTTOM).title(" Input file ");
+    let path_block = Block::default()
+        .borders(Borders::BOTTOM)
+        .title(" Input file ");
     let path_text = Paragraph::new(state.input_path)
         .block(path_block)
         .style(Style::default().fg(Color::Yellow));
@@ -220,7 +226,11 @@ fn draw_confirmation(frame: &mut ratatui::Frame, state: &AppState) {
         .map(|l| ListItem::new(Line::from(*l)))
         .collect();
     let file_list = List::new(items)
-        .block(Block::default().borders(Borders::BOTTOM).title(" Contents "))
+        .block(
+            Block::default()
+                .borders(Borders::BOTTOM)
+                .title(" Contents "),
+        )
         .style(Style::default().fg(Color::White));
     frame.render_widget(file_list, chunks[1]);
 
@@ -233,7 +243,11 @@ fn draw_confirmation(frame: &mut ratatui::Frame, state: &AppState) {
             .collect::<Vec<_>>(),
     );
     let summary = Paragraph::new(summary_text)
-        .block(Block::default().borders(Borders::BOTTOM).title(" Parsed summary "))
+        .block(
+            Block::default()
+                .borders(Borders::BOTTOM)
+                .title(" Parsed summary "),
+        )
         .wrap(Wrap { trim: false });
     frame.render_widget(summary, chunks[2]);
 
@@ -247,12 +261,12 @@ fn draw_confirmation(frame: &mut ratatui::Frame, state: &AppState) {
 fn draw_results(frame: &mut ratatui::Frame, state: &AppState) {
     let area = frame.area();
 
-    let outer = Block::default()
-        .borders(Borders::ALL)
-        .title(Span::styled(
-            " Scheduler — Results ",
-            Style::default().fg(Color::Green).add_modifier(Modifier::BOLD),
-        ));
+    let outer = Block::default().borders(Borders::ALL).title(Span::styled(
+        " Scheduler — Results ",
+        Style::default()
+            .fg(Color::Green)
+            .add_modifier(Modifier::BOLD),
+    ));
     let inner_area = outer.inner(area);
     frame.render_widget(outer, area);
 
@@ -317,8 +331,7 @@ fn draw_results(frame: &mut ratatui::Frame, state: &AppState) {
         })
         .collect();
 
-    let scrolled_list = List::new(visible_items)
-        .block(Block::default().borders(Borders::NONE));
+    let scrolled_list = List::new(visible_items).block(Block::default().borders(Borders::NONE));
     frame.render_widget(scrolled_list, chunks[0]);
 
     let _ = results_list; // silence unused warning from the first construction

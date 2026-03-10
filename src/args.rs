@@ -18,7 +18,7 @@ pub struct Args {
     /// Path to the .in input file describing the workload.
     pub input_file: PathBuf,
 
-    /// Colorize output with ANSI escape codes.
+    /// Colorize output with ANSI escape codes (non-TUI mode only).
     ///
     /// Events are color-coded by type:
     ///   arrived  -> cyan
@@ -27,6 +27,18 @@ pub struct Args {
     ///   Idle     -> dark grey
     #[arg(short = 'c', long = "color", default_value_t = false)]
     pub color: bool,
+
+    /// Print simulation output to stdout (non-TUI mode only).
+    ///
+    /// Without this flag the output is only written to the .out file.
+    #[arg(short = 'p', long = "print", default_value_t = false)]
+    pub print: bool,
+
+    /// Disable writing the .out file (non-TUI mode only).
+    ///
+    /// Useful when you only want stdout output (combine with -p).
+    #[arg(short = 'd', long = "no-file", default_value_t = false)]
+    pub no_file: bool,
 
     /// Open an interactive TUI to preview input and view results.
     ///

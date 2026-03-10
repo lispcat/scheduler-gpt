@@ -36,11 +36,41 @@ fn main() {
     // Run the simulation.
     let events = scheduler::simulate(&mut sim_config);
 
-    // Build plain output (always written to the .out file).
+    // Build plain output (no ANSI codes) — used for the .out file and as the
+    // base for non-colorized stdout.
     let plain = output::build_output(&sim_config, &events, false);
 
-    // Derive output file path and write it.
-    let out_filename = Path::new(input_path)
+    if args.tui {
+        // TUI mode: write the .out file first so it exists even if the user
+        // quits the TUI early, then open the interactive interface.
+        // -p / -d / -c are ignored in TUI mode.
+        write_output_file(input_path, &plain);
+        let input_path_str = input_path.to_string_lossy();
+        if let Err(e) = tui::run_tui(&input_path_str, &content, &sim_config, &plain) {
+            eprintln!("TUI error: {}", e);
+            std::process::exit(1);
+        }
+    } else {
+        // Normal (non-TUI) mode.
+
+        // Write .out file unless -d / --no-file was passed.
+        if !args.no_file {
+            write_output_file(input_path, &plain);
+        }
+
+        // Print to stdout if -p / --print was passed.
+        if args.print {
+            let display = output::build_output(&sim_config, &events, args.color);
+            print!("{}", display);
+        }
+    }
+}
+
+/// Derive the output path from the input path and write `content` to it.
+/// The output is always placed in the current working directory, never next
+/// to the input file (which may be in a different directory).
+fn write_output_file(input_path: &Path, content: &str) {
+    let out_filename = input_path
         .file_stem()
         .expect("input path has no filename")
         .to_string_lossy()
@@ -48,24 +78,10 @@ fn main() {
         + ".out";
     let out_path = Path::new(&out_filename).to_path_buf();
 
-    if let Err(e) = fs::write(&out_path, &plain) {
+    if let Err(e) = fs::write(&out_path, content) {
         eprintln!("Error writing '{}': {}", out_path.display(), e);
         std::process::exit(1);
     }
 
-    if args.tui {
-        // TUI mode: confirmation screen -> results screen.
-        // The output file has already been written above, so the user can
-        // inspect it even if they quit the TUI early.
-        let input_path_str = input_path.to_string_lossy();
-        if let Err(e) = tui::run_tui(&input_path_str, &content, &sim_config, &plain) {
-            eprintln!("TUI error: {}", e);
-            std::process::exit(1);
-        }
-    } else {
-        // Normal (non-TUI) mode: print to stdout, optionally colorized.
-        let display = output::build_output(&sim_config, &events, args.color);
-        print!("{}", display);
-        eprintln!("Output written to {}", out_path.display());
-    }
+    eprintln!("Output written to {}", out_path.display());
 }

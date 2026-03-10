@@ -9,19 +9,35 @@ use crate::models::{Algorithm, Config};
 // codes rather than a crate keeps us dependency-free in this module.
 
 fn cyan(s: &str, color: bool) -> String {
-    if color { format!("\x1b[36m{}\x1b[0m", s) } else { s.to_string() }
+    if color {
+        format!("\x1b[36m{}\x1b[0m", s)
+    } else {
+        s.to_string()
+    }
 }
 
 fn green(s: &str, color: bool) -> String {
-    if color { format!("\x1b[32m{}\x1b[0m", s) } else { s.to_string() }
+    if color {
+        format!("\x1b[32m{}\x1b[0m", s)
+    } else {
+        s.to_string()
+    }
 }
 
 fn yellow(s: &str, color: bool) -> String {
-    if color { format!("\x1b[33m{}\x1b[0m", s) } else { s.to_string() }
+    if color {
+        format!("\x1b[33m{}\x1b[0m", s)
+    } else {
+        s.to_string()
+    }
 }
 
 fn dark_grey(s: &str, color: bool) -> String {
-    if color { format!("\x1b[90m{}\x1b[0m", s) } else { s.to_string() }
+    if color {
+        format!("\x1b[90m{}\x1b[0m", s)
+    } else {
+        s.to_string()
+    }
 }
 
 /// Colorize a single event line based on its keyword.
