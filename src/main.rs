@@ -133,20 +133,24 @@ fn main() {
     // Format the full output text from the event log and process stats.
     let output = build_output(&config, &events);
 
-    // Derive the output filename: same base name, ".out" extension.
-    // e.g. "input.in" -> "input.out"
-    let out_path = Path::new(input_path)
-        .with_extension("out")
+    // Derive the output filename: take only the file stem (no directory
+    // component) and add ".out", then write into the current working directory.
+    // e.g. running with "../tests/data/input.in" produces "./input.out"
+    let out_filename = Path::new(input_path)
+        .file_stem() // "input"  (drops directory + extension)
+        .expect("input path has no filename")
         .to_string_lossy()
-        .to_string();
+        .to_string()
+        + ".out"; // -> "input.out"
+    let out_path = Path::new(&out_filename).to_path_buf();
 
     // Write output file; exit with an error if the write fails.
     if let Err(e) = fs::write(&out_path, &output) {
-        eprintln!("Error writing '{}': {}", out_path, e);
+        eprintln!("Error writing '{}': {}", out_path.display(), e);
         std::process::exit(1);
     }
 
-    println!("Output written to {}", out_path);
+    println!("Output written to {}", out_path.display());
 }
 
 // ---------------------------------------------------------------------------
