@@ -36,29 +36,23 @@ fn main() {
     // Run the simulation.
     let events = scheduler::simulate(&mut sim_config);
 
-    // Build plain output (no ANSI codes) — used for the .out file and as the
-    // base for non-colorized stdout.
+    // Build plain output (no ANSI codes) — used for the .out file.
     let plain = output::build_output(&sim_config, &events, false);
 
-    if args.tui {
-        // TUI mode: write the .out file first so it exists even if the user
-        // quits the TUI early, then open the interactive interface.
-        // -p / -d / -c are ignored in TUI mode.
+    // Write the .out file unless -d was passed.  This applies in all modes.
+    if !args.no_file {
         write_output_file(input_path, &plain);
+    }
+
+    if args.tui {
+        // TUI mode: -c and -p are ignored; -d was already honoured above.
         let input_path_str = input_path.to_string_lossy();
         if let Err(e) = tui::run_tui(&input_path_str, &content, &sim_config, &plain) {
             eprintln!("TUI error: {}", e);
             std::process::exit(1);
         }
     } else {
-        // Normal (non-TUI) mode.
-
-        // Write .out file unless -d / --no-file was passed.
-        if !args.no_file {
-            write_output_file(input_path, &plain);
-        }
-
-        // Print to stdout if -p / --print was passed.
+        // Normal mode: print to stdout if -p was passed.
         if args.print {
             let display = output::build_output(&sim_config, &events, args.color);
             print!("{}", display);

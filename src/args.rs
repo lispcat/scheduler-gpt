@@ -28,15 +28,17 @@ pub struct Args {
     #[arg(short = 'c', long = "color", default_value_t = false)]
     pub color: bool,
 
-    /// Print simulation output to stdout (non-TUI mode only).
+    /// Print output to stdout (non-TUI mode only).
     ///
-    /// Without this flag the output is only written to the .out file.
+    /// Does not affect whether the .out file is written; combine with -d to
+    /// suppress the file entirely.
     #[arg(short = 'p', long = "print", default_value_t = false)]
     pub print: bool,
 
-    /// Disable writing the .out file (non-TUI mode only).
+    /// Disable writing the .out file.
     ///
-    /// Useful when you only want stdout output (combine with -p).
+    /// Works in both normal and TUI mode.  In TUI mode the simulation still
+    /// runs; results are shown on screen but nothing is written to disk.
     #[arg(short = 'd', long = "no-file", default_value_t = false)]
     pub no_file: bool,
 
