@@ -155,8 +155,28 @@ fn tempfile(label: &str) -> PathBuf {
 // ---------------------------------------------------------------------------
 
 #[test]
+fn test_c10_fcfs() {
+    run_test("c10-fcfs");
+}
+
+#[test]
+fn test_c10_rr() {
+    run_test("c10-rr");
+}
+
+#[test]
+fn test_c10_sjf() {
+    run_test("c10-sjf");
+}
+
+#[test]
 fn test_c2_fcfs() {
     run_test("c2-fcfs");
+}
+
+#[test]
+fn test_c2_rr() {
+    run_test("c2-rr");
 }
 
 #[test]
@@ -165,8 +185,18 @@ fn test_c2_sjf() {
 }
 
 #[test]
-fn test_c2_rr() {
-    run_test("c2-rr");
+fn test_c5_fcfs() {
+    run_test("c5-fcfs");
+}
+
+#[test]
+fn test_c5_rr() {
+    run_test("c5-rr");
+}
+
+#[test]
+fn test_c5_sjf() {
+    run_test("c5-sjf");
 }
 
 // Add more tests here as you add fixture files, e.g.:

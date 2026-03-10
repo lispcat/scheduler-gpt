@@ -649,8 +649,9 @@ fn build_output(config: &Config, events: &[String]) -> String {
         Algorithm::Sjf => lines.push("Using preemptive Shortest Job First".to_string()),
         Algorithm::Rr(q) => {
             lines.push("Using Round-Robin".to_string());
-            // Quantum value is 3-wide right-justified.
+            // Quantum value is 3-wide right-justified, followed by a blank line.
             lines.push(format!("Quantum {:3}", q));
+            lines.push(String::new());
         }
     }
 
@@ -680,5 +681,5 @@ fn build_output(config: &Config, events: &[String]) -> String {
         }
     }
 
-    lines.join("\n")
+    lines.join("\n") + "\n"
 }
