@@ -34,7 +34,7 @@ fn data_dir() -> PathBuf {
 fn run_scheduler(input_file: &Path, cwd: &Path) -> (std::process::ExitStatus, String, String) {
     // `env!("CARGO_BIN_EXE_scheduler")` is injected by Cargo at compile time;
     // the string after the underscore must match the [[bin]] name in Cargo.toml.
-    let bin = env!("CARGO_BIN_EXE_scheduler-get");
+    let bin = env!("CARGO_BIN_EXE_scheduler-gpt");
 
     let output = Command::new(bin)
         .arg(input_file)
