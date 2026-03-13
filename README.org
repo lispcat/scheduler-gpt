@@ -1,0 +1,165 @@
+* PA#1 Scheduler GPT
+
+** Table of Contents :TOC_4:
+- [[#pa1-scheduler-gpt][PA#1 Scheduler GPT]]
+  - [[#about][About]]
+  - [[#file-structure][File Structure]]
+  - [[#installingrunning][Installing/running]]
+    - [[#clone-repository][Clone repository]]
+    - [[#compile][Compile]]
+    - [[#running-tests-optional][Running Tests (optional)]]
+    - [[#running-the-program][Running the program]]
+      - [[#input-file][Input file]]
+      - [[#arguments][Arguments]]
+
+** About
+
+- This is a group project for the COP4600 class.
+- This program is written in Rust with the help of an LLM, as per instructions, and simulates the following process scheduling algorithms:
+  - FIFO (first in, first out)
+  - Pre-emptive SJF (shortest job first)
+  - RR (round robin)
+
+** File Structure
+
+- The codebase is organized with modularity and test-driven development in mind.
+  - Source files (under =./src=) are separated into modules. =main.rs= is the entrypoint.
+  - Test-driven development is achieved via the integration tests in =./tests/integration_test.rs=, which takes input files from =./tests/data/*= and compares against corresponding expected outputs, also in the same directory. The integration tests are ran with =$ cargo test=.
+  - The following is the project's file tree.
+
+#+begin_src bash
+.
+├── Cargo.lock
+├── Cargo.toml
+├── README.org
+├── src
+│   ├── args.rs
+│   ├── main.rs
+│   ├── models.rs
+│   ├── output.rs
+│   ├── parser.rs
+│   ├── scheduler.rs
+│   └── tui.rs
+├── target # omitted for brevity
+└── tests
+    ├── data
+    │   ├── c10-fcfs.in
+    │   ├── c10-fcfs.out
+    │   ├── c10-rr.in
+    │   ├── c10-rr.out
+    │   ├── c10-sjf.in
+    │   ├── c10-sjf.out
+    │   ├── c2-fcfs.in
+    │   ├── c2-fcfs.out
+    │   ├── c2-rr.in
+    │   ├── c2-rr.out
+    │   ├── c2-sjf.in
+    │   ├── c2-sjf.out
+    │   ├── c5-fcfs.in
+    │   ├── c5-fcfs.out
+    │   ├── c5-rr.in
+    │   ├── c5-rr.out
+    │   ├── c5-sjf.in
+    │   ├── c5-sjf.out
+    │   ├── test1.in
+    │   └── test1.out
+    └── integration_test.rs
+
+#+end_src
+
+** Installing/running
+
+*** Clone repository
+
+#+begin_src bash
+$ git clone https://github.com/lispcat/scheduler-gpt.git
+$ cd chatgpt-scheduler
+#+end_src
+
+*** Compile
+
+Running =cargo build= will install necessary dependencies from =crates.io= and place the compiled binary at =./target/debug/scheduler-gpt=. This project depends on the following libraries:
+- clap :: an elegant command-line argument parser.
+- ratatui :: a simple framework for creating TUIs (text-based user interface).
+- crossterm :: helper library for ratatui.
+
+#+begin_src bash
+$ cargo build
+#+end_src
+
+*** Running Tests (optional)
+
+If one wants to verify that all input/output tests pass, run =cargo test=. This will run the integration tests.
+
+#+begin_src bash
+$ cargo test
+#+end_src
+
+*** Running the program
+
+To run the compiled binary, navigate to =./target/debug/scheduler-gpt= and run the program.
+
+#+begin_src bash
+$ cd target/debug
+$ ./scheduler-gpt
+#+end_src
+
+Running with no arguments, it should print:
+
+#+begin_src bash
+error: the following required arguments were not provided:
+  <INPUT_FILE>
+
+Usage: scheduler-gpt [OPTIONS] <input file>
+
+For more information, try '--help'.
+#+end_src
+
+Alternatively, you can simply run the following while anywhere in the repo:
+
+#+begin_src bash
+cargo run -- [args and infile here]
+#+end_src
+
+**** Input file
+
+An input file can be specified with the following:
+
+#+begin_src bash
+# Using an example test file
+$ ./scheduler-gpt ../../tests/data/c10-rr.in
+#+end_src
+
+This will print:
+
+#+begin_src bash
+Output written to c10-rr.out
+#+end_src
+
+There should now be an output file in the current working directory.
+
+**** Arguments
+
+Arguments can be passed before specifying the input file. Running =-h= will print the following:
+
+#+begin_src conf
+Process scheduling algorithm simulator
+
+Usage: scheduler-gpt [OPTIONS] <input file>
+
+Arguments:
+  <INPUT_FILE>  Path to the .in input file describing the workload
+
+Options:
+  -c, --color    Colorize output with ANSI escape codes (non-TUI mode only)
+  -p, --print    Print output to stdout (non-TUI mode only)
+  -d, --no-file  Disable writing the .out file
+  -t, --tui      Open an interactive TUI to preview input and view results
+  -h, --help     Print help (see more with '--help')
+  -V, --version  Print version
+#+end_src
+
+- Examples:
+  - To prevent writing the output to a file, but also print it to stdout, the args =-d -p= can be passed.
+  - To aid in readability, the =-c= arg can be used to colorize output. This must be passed with =-p= to have any effect, however.
+  - For an interactive TUI interface =-t= can be used. This interface will first show the contents of the input file, as well as a summary of the details of the input file. Pressing the Enter key will run the simulation and show the output with color. This will still write the output file, which can be omitted with =-d=.

@@ -9,10 +9,10 @@ use clap::Parser;
 /// current working directory.
 #[derive(Parser, Debug)]
 #[command(
-    name = "scheduler-get",
+    name = "scheduler-gpt",
     version,
     about,
-    override_usage = "scheduler-get [OPTIONS] <input file>"
+    override_usage = "scheduler-gpt [OPTIONS] <input file>"
 )]
 pub struct Args {
     /// Path to the .in input file describing the workload.
