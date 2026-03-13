@@ -28,7 +28,7 @@ use ratatui::{
     Terminal,
 };
 
-use crate::models::Config;
+use crate::modules::models::Config;
 
 // ---------------------------------------------------------------------------
 // Public entry point

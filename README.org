@@ -36,13 +36,15 @@
 ├── Cargo.toml
 ├── README.org
 ├── src
-│   ├── args.rs
 │   ├── main.rs
-│   ├── models.rs
-│   ├── output.rs
-│   ├── parser.rs
-│   ├── scheduler.rs
-│   └── tui.rs
+│   └── modules
+│       ├── args.rs
+│       ├── mod.rs
+│       ├── models.rs
+│       ├── output.rs
+│       ├── parser.rs
+│       ├── scheduler.rs
+│       └── tui.rs
 ├── target # omitted for brevity
 └── tests
     ├── data

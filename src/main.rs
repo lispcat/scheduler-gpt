@@ -3,15 +3,16 @@ use std::path::Path;
 
 use clap::Parser;
 
-mod args;
-mod models;
-mod output;
-mod parser;
-mod scheduler;
-mod tui;
+mod modules;
+
+use modules::args::Args;
+use modules::output::build_output;
+use modules::parser::parse_input;
+use modules::scheduler::simulate;
+use modules::tui::run_tui;
 
 fn main() {
-    let args = args::Args::parse();
+    let args = Args::parse();
 
     let input_path = &args.input_file;
 
@@ -25,7 +26,7 @@ fn main() {
     };
 
     // Parse the input text into a SimConfig (domain config from the .in file).
-    let mut sim_config = match parser::parse_input(&content) {
+    let mut sim_config = match parse_input(&content) {
         Ok(c) => c,
         Err(e) => {
             eprintln!("{}", e);
@@ -34,10 +35,10 @@ fn main() {
     };
 
     // Run the simulation.
-    let events = scheduler::simulate(&mut sim_config);
+    let events = simulate(&mut sim_config);
 
     // Build plain output (no ANSI codes) — used for the .out file.
-    let plain = output::build_output(&sim_config, &events, false);
+    let plain = build_output(&sim_config, &events, false);
 
     // Write the .out file unless -d was passed.  This applies in all modes.
     if !args.no_file {
@@ -47,14 +48,14 @@ fn main() {
     if args.tui {
         // TUI mode: -c and -p are ignored; -d was already honoured above.
         let input_path_str = input_path.to_string_lossy();
-        if let Err(e) = tui::run_tui(&input_path_str, &content, &sim_config, &plain) {
+        if let Err(e) = run_tui(&input_path_str, &content, &sim_config, &plain) {
             eprintln!("TUI error: {}", e);
             std::process::exit(1);
         }
     } else {
         // Normal mode: print to stdout if -p was passed.
         if args.print {
-            let display = output::build_output(&sim_config, &events, args.color);
+            let display = build_output(&sim_config, &events, args.color);
             print!("{}", display);
         }
     }

@@ -1,4 +1,4 @@
-use crate::models::{Algorithm, Config};
+use crate::modules::models::{Algorithm, Config};
 
 // ---------------------------------------------------------------------------
 // ANSI color helpers

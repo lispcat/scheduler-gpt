@@ -1,4 +1,4 @@
-use crate::models::{Algorithm, Config, Process};
+use crate::modules::models::{Algorithm, Config, Process};
 
 // ---------------------------------------------------------------------------
 // Public API
