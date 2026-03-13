@@ -1,7 +1,6 @@
-* PA#1 Scheduler GPT
+#+title: PA#1 Scheduler GPT
 
 ** Table of Contents :TOC_4:
-- [[#pa1-scheduler-gpt][PA#1 Scheduler GPT]]
   - [[#about][About]]
   - [[#file-structure][File Structure]]
   - [[#installingrunning][Installing/running]]
