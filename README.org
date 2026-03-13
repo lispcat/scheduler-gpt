@@ -2,7 +2,7 @@
 
 ** Table of Contents :TOC_4:
   - [[#about][About]]
-  - [[#file-structure][File Structure]]
+  - [[#organization][Organization]]
   - [[#installingrunning][Installing/running]]
     - [[#clone-repository][Clone repository]]
     - [[#compile][Compile]]
@@ -10,20 +10,21 @@
     - [[#running-the-program][Running the program]]
       - [[#input-file][Input file]]
       - [[#arguments][Arguments]]
+    - [[#license][License]]
 
 ** About
 
-- This is a group project for the COP4600 class.
+- This is a group project for the COP4600, Spring 2026 Operating Systems class, Team 2 (member names omitted for privacy).
 - This program is written in Rust with the help of an LLM, as per instructions, and simulates the following process scheduling algorithms:
   - FIFO (first in, first out)
   - Pre-emptive SJF (shortest job first)
   - RR (round robin)
 
-** File Structure
+** Organization
 
 - The codebase is organized with modularity and test-driven development in mind.
-  - Source files (under =./src=) are separated into modules. =main.rs= is the entrypoint.
-  - Test-driven development is achieved via the integration tests in =./tests/integration_test.rs=, which takes input files from =./tests/data/*= and compares against corresponding expected outputs, also in the same directory. The integration tests are ran with =$ cargo test=.
+  - Source files (under =./src=) are separated into modules, with =./src/main.rs= as the entrypoint.
+  - Test-driven development is achieved via the integration tests inside =./tests/integration_test.rs=. The tests run the program with an input file and compares against a corresponding expected output file. Both types of tests can be found under =./tests/data/*=. All the tests can be ran with =$ cargo test=.
   - The following is the project's file tree.
 
 #+begin_src bash
@@ -162,3 +163,9 @@ Options:
   - To prevent writing the output to a file, but also print it to stdout, the args =-d -p= can be passed.
   - To aid in readability, the =-c= arg can be used to colorize output. This must be passed with =-p= to have any effect, however.
   - For an interactive TUI interface =-t= can be used. This interface will first show the contents of the input file, as well as a summary of the details of the input file. Pressing the Enter key will run the simulation and show the output with color. This will still write the output file, which can be omitted with =-d=.
+
+*** License
+
+This project is licensed under the GNU General Public License v3.0.
+
+See the LICENSE file for details.
