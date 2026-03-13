@@ -6,15 +6,18 @@
   - [[#installingrunning][Installing/running]]
     - [[#clone-repository][Clone repository]]
     - [[#compile][Compile]]
-    - [[#running-tests-optional][Running Tests (optional)]]
+      - [[#dependencies][Dependencies]]
+    - [[#optional-running-tests][Optional: Running Tests]]
     - [[#running-the-program][Running the program]]
       - [[#input-file][Input file]]
       - [[#arguments][Arguments]]
-    - [[#license][License]]
+  - [[#license][License]]
 
 ** About
 
-- This is a group project for the COP4600, Spring 2026 Operating Systems class, Team 2 (member names omitted for privacy).
+- This is a group project for the COP4600, Spring 2026 Operating Systems class.
+  - Team 2
+  - Members: Brianna, Yui, Joseph, Ryan, Michael (last names omitted for privacy).
 - This program is written in Rust with the help of an LLM, as per instructions, and simulates the following process scheduling algorithms:
   - FIFO (first in, first out)
   - Pre-emptive SJF (shortest job first)
@@ -78,18 +81,22 @@ $ cd chatgpt-scheduler
 
 *** Compile
 
-Running =cargo build= will install necessary dependencies from =crates.io= and place the compiled binary at =./target/debug/scheduler-gpt=. This project depends on the following libraries:
-- clap :: an elegant command-line argument parser.
-- ratatui :: a simple framework for creating TUIs (text-based user interface).
-- crossterm :: helper library for ratatui.
+Running =cargo build= will install necessary dependencies from =crates.io= and place the compiled binary at =./target/debug/scheduler-gpt=.
 
 #+begin_src bash
 $ cargo build
 #+end_src
 
-*** Running Tests (optional)
+**** Dependencies
 
-If one wants to verify that all input/output tests pass, run =cargo test=. This will run the integration tests.
+This project depends on the following libraries:
+- clap :: An elegant command-line argument parser.
+- ratatui :: A simple framework for creating TUIs (text-based user interface).
+- crossterm :: Helper library for ratatui.
+
+*** Optional: Running Tests
+
+If one wants to verify that all input/output tests pass, run =cargo test=. This will run the integration tests. If tests fail, a diff will be shown.
 
 #+begin_src bash
 $ cargo test
@@ -118,7 +125,7 @@ For more information, try '--help'.
 Alternatively, you can simply run the following while anywhere in the repo:
 
 #+begin_src bash
-cargo run -- [args and infile here]
+cargo run -- [args and input file here]
 #+end_src
 
 **** Input file
@@ -126,6 +133,7 @@ cargo run -- [args and infile here]
 An input file can be specified with the following:
 
 #+begin_src bash
+# Assuming current directory is ./target/debug
 # Using an example test file
 $ ./scheduler-gpt ../../tests/data/c10-rr.in
 #+end_src
@@ -161,10 +169,10 @@ Options:
 
 - Examples:
   - To prevent writing the output to a file, but also print it to stdout, the args =-d -p= can be passed.
-  - To aid in readability, the =-c= arg can be used to colorize output. This must be passed with =-p= to have any effect, however.
-  - For an interactive TUI interface =-t= can be used. This interface will first show the contents of the input file, as well as a summary of the details of the input file. Pressing the Enter key will run the simulation and show the output with color. This will still write the output file, which can be omitted with =-d=.
+  - To aid in readability, the =-c= arg can be used to colorize output. However, this must be passed with =-p= to have any effect, since by default, the output isn't written to stdout.
+  - For an interactive TUI interface, =-t= can be used. Upon running, this interface will first show the contents of the input file, as well as a summary of the details of the input file. Pressing the Enter key will run the simulation and show the output with color. Note that this will still write the output file, which can be prevented with =-d=.
 
-*** License
+** License
 
 This project is licensed under the GNU General Public License v3.0.
 
