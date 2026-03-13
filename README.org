@@ -16,7 +16,7 @@
 ** About
 
 - This is a group project for the COP4600, Spring 2026 Operating Systems class.
-  - Team 2
+  - Group 2
   - Members: Brianna, Yui, Joseph, Ryan, Michael (last names omitted for privacy).
 - This program is written in Rust with the help of an LLM, as per instructions, and simulates the following process scheduling algorithms:
   - FIFO (first in, first out)
